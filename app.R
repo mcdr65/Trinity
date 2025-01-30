@@ -16,7 +16,7 @@ ll_MLE <- log_likelihood(theta_MLE, theta_MLE, sigma)
 
 ui <- fluidPage(
     titlePanel("Trinity"),
-    verticalLayout(sliderInput(inputId="theta_0",label="Null Hypothesis",min=-1,max=1,value=0,step=0.1),
+    verticalLayout(sliderInput(inputId="theta_0",label="Null Hypothesis",min=-2,max=2,value=0,step=0.1),
                     plotOutput(outputId="LL",width="50%")))
 
 
