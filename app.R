@@ -12,26 +12,27 @@ qa<-function(theta,mle,se) {
 
 ui <- fluidPage(
     titlePanel("One-parameter model: Trinity of asymptotic tests"),
-    sliderInput(inputId="x",label="Data: Counts out of 100",min=0,max=100,value=50,step=1),
-    sliderInput(inputId="theta_0",label="Null Hypothesis (Constraint)",min=0.1,max=0.9,value=0.5,step=0.01),   
+    sliderInput(inputId="x",label="Data: successes",min=0,max=400,value=100,step=1),
+    sliderInput(inputId="n",label="Data: sample size",min=1,max=400,step=1,value=200),
+    sliderInput(inputId="theta_0",label="Null Hypothesis (Constraint)",min=0.1,max=0.9,value=0.5,step=0.01),
     plotOutput(outputId="LL",width="50%")
 )
 
 
 server <- function(input, output) {
     output$LL<-renderPlot({
-        n<-100
-        mle<-input$x/n
-        se<-sqrt(mle*(1-mle)/n)
+        n<-input$n
+        mle<-input$x/input$n
+        se<-sqrt(mle*(1-mle)/input$n)
         theta_seq<-seq(0.05,0.95,.01)
         # Calculate log-likelihood values
-        ll_values <- ll(theta_seq,input$x,n)
-        ll_MLE <- ll(mle,input$x,n)
+        ll_values <- ll(theta_seq,input$x,input$n)
+        ll_MLE <- ll(mle,input$x,input$n)
         qa_values <- qa(theta_seq,mle=mle,se=se)
         qa_MLE <- qa(mle,mle=mle,se=se)
-        ll_null <- ll(input$theta_0,input$x,n)
+        ll_null <- ll(input$theta_0,input$x,input$n)
         qa_null <- qa(input$theta_0,mle=mle,se=se)
-        slope <- input$x/input$theta_0-(n-input$x)/(1-input$theta_0)
+        slope <- input$x/input$theta_0-(input$n-input$x)/(1-input$theta_0)
         tangent_range <- seq(input$theta_0 - 0.1, input$theta_0 + 0.1, length.out = 100)
         tangent_line <- ll_null + slope * (tangent_range - input$theta_0)
         data   <- data.frame(theta = theta_seq,ll = ll_values)
