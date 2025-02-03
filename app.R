@@ -37,23 +37,23 @@ server <- function(input, output) {
         data   <- data.frame(theta = theta_seq,ll = ll_values)
         dataqa <- data.frame(theta = theta_seq,qa = qa_values)
         tangent_data <- data.frame(theta = tangent_range,ll = tangent_line)
-        ggplot(data, aes(x = theta, y = ll))+ ylim(-100,10)+
+        ggplot(data, aes(x = theta, y = ll))+ ylim(-150,10)+
             geom_line() +
             geom_vline(xintercept = mle, linetype = "dashed", color = "blue") +
-            geom_vline(xintercept = input$theta_0, linetype = "dashed", color = "brown") +
+            geom_vline(xintercept = input$theta_0, linetype = "dashed", color = "red") +
             geom_hline(yintercept = 0, linetype = "dotted",color="brown") +
             geom_hline(yintercept = ll_null, linetype = "dotted",color="brown") +
             geom_segment(aes(x = mle, y = qa_null, xend = input$theta_0, yend = qa_null),
                          arrow = arrow(type = "closed", ends = "both", length = unit(0.2, "cm")), linetype="dashed",color = "blue",lwd=1.5) +
             geom_segment(data = tangent_data, aes(x = theta[1], y = ll[1], xend = theta[100], yend = ll[100]),  lwd=1.5,color = "red") +
-            geom_segment(aes(x = input$theta_0+.2, y = ll_null, xend = input$theta_0+.2, yend = ll_MLE),
+            geom_segment(aes(x = input$theta_0, y = ll_null, xend = input$theta_0, yend = ll_MLE),
                          arrow = arrow(type = "closed", ends = "both", length = unit(0.2, "cm")), lwd=1.5,color = "brown") +
             labs(x = expression(theta),y = "Log-Likelihood (black), quadratic approximation (dashed)") +
             scale_x_continuous() +
              ## scale_x_continuous(breaks = c(input$theta_0, mle), labels = c(expression(theta[0]), expression(hat(theta)[MLE])))+ 
-            annotate("text", x = input$theta_0, y = qa_null-0.5, label = expression(Wald),color = "blue", vjust = -1, hjust = 1.5) +
-            annotate("text", x = (input$theta_0+mle)/2, y = ll_null, label = expression(Score), color = "red", vjust = -1, hjust = -0.5)+
-            annotate("text", x = input$theta_0+0.1, y = (ll_null + ll_MLE) / 2, label = expression(LR), color = "brown", vjust = -1, hjust = -0.5)+
+            annotate("text", x = mle, y = qa_null, label = expression(Wald),color = "blue", vjust = -1, hjust = 1.5) +
+            annotate("text", x = input$theta_0, y = ll_null, label = expression(Score), color = "red", vjust = -1, hjust = -0.5)+
+            annotate("text", x = input$theta_0, y = (ll_null + ll_MLE) / 2, label = expression(LR), color = "brown", vjust = -1, hjust = -0.5)+
             geom_line(data=dataqa,aes(x=theta,y=qa),linetype="dashed")
     })
 }    
