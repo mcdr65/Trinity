@@ -12,7 +12,7 @@ qa<-function(theta,mle,se) {
 
 ui <- fluidPage(
     titlePanel("One-parameter model: Trinity of asymptotic tests"),
-    sliderInput(inputId="x",label="Data: successes",min=0,max=400,value=100,step=1),
+    sliderInput(inputId="x",label="Data: successes",min=0,max=400,value=161,step=1),
     sliderInput(inputId="n",label="Data: sample size",min=1,max=400,step=1,value=200),
     sliderInput(inputId="theta_0",label="Null Hypothesis (Constraint)",min=0.1,max=0.9,value=0.5,step=0.01),
     plotOutput(outputId="LL",width="50%")
