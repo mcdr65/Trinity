@@ -9,22 +9,61 @@ qa<-function(theta,mle,se) {
     -0.5 * ((mle - theta)^2 / se^2)
 }
 
+wald_test <- function(x, n, theta0) {
+  p_hat <- x / n
+  se <- sqrt(p_hat * (1 - p_hat) / n)
+  z <- (p_hat - theta0) / se
+  p_value <- 2 * (1 - pnorm(abs(z)))
+  return(p_value)
+}
+
+score_test <- function(x, n, theta0) {
+  se <- sqrt(theta0 * (1 - theta0) / n)
+  z <- (x - n * theta0) / (n * se)
+  p_value <- 2 * (1 - pnorm(abs(z)))
+  return(p_value)
+}
+
+lr_test <- function(x, n, theta0) {
+  p_hat <- x / n
+  log_likelihood_null <- x * log(theta0) + (n - x) * log(1 - theta0)
+  log_likelihood_alt <- x * log(p_hat) + (n - x) * log(1 - p_hat)
+  lr_stat <- -2 * (log_likelihood_null - log_likelihood_alt)
+  p_value <- 1 - pchisq(lr_stat, df = 1)
+  return(p_value)
+}
 
 ui <- fluidPage(
-    titlePanel("One-parameter model: Trinity of asymptotic tests"),
-    sliderInput(inputId="x",label="Data: successes",min=0,max=400,value=161,step=1),
-    sliderInput(inputId="n",label="Data: sample size",min=1,max=400,step=1,value=200),
-    sliderInput(inputId="theta_0",label="Null Hypothesis (Constraint)",min=0.1,max=0.9,value=0.5,step=0.01),
-    plotOutput(outputId="LL",width="50%")
-)
+  withMathJax(),
+    titlePanel("Binomial likelihood: Trinity of asymptotic tests"),
+    sidebarLayout(          
+        sidebarPanel(
+            titlePanel("Data and Hypothesis"),
+            sliderInput(inputId="x",label="Data: Number of successes",min=50,max=350,value=100,step=5),
+            sliderInput(inputId="n",label="Data: Sample size",min=0,max=400,step=5,value=300),
+            sliderInput(inputId="theta_0",label="Constraint (Null hypothesis)",min=0.1,max=0.9,value=0.5,step=0.01)
+        ),
+        mainPanel(
+            titlePanel("Wald, Score and LR-Test"),
+            plotOutput(outputId="LL",width="50%"),
+            )))
 
 
-server <- function(input, output) {
+
+
+server <- function(input, output,session) {
+
+ observeEvent(input$x, {
+    updateSliderInput(inputId = "n", min = input$x)
+ })
+
+    
+    
     output$LL<-renderPlot({
         n<-input$n
         mle<-input$x/input$n
         se<-sqrt(mle*(1-mle)/input$n)
-        theta_seq<-seq(0.05,0.95,.01)
+        theta_seq<-seq(0.0,1,.01)
         # Calculate log-likelihood values
         ll_values <- ll(theta_seq,input$x,input$n)
         ll_MLE <- ll(mle,input$x,input$n)
@@ -38,7 +77,7 @@ server <- function(input, output) {
         data   <- data.frame(theta = theta_seq,ll = ll_values)
         dataqa <- data.frame(theta = theta_seq,qa = qa_values)
         tangent_data <- data.frame(theta = tangent_range,ll = tangent_line)
-        ggplot(data, aes(x = theta, y = ll))+ ylim(-150,10)+
+        ggplot(data, aes(x = theta, y = ll))+ ylim(-150,10)+xlim(0,1)+
             geom_line() +
             geom_vline(xintercept = mle, linetype = "dashed", color = "blue") +
             geom_vline(xintercept = input$theta_0, linetype = "dashed", color = "red") +
